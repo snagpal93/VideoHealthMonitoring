@@ -170,10 +170,5 @@ end
 %    interpolation. Vector x contains the sample points, and v contains the corresponding values, ...
 %    v(x). Vector xq contains the coordinates of the query points.
 
-
-
-
-
-
 % Clean Up
 clear cam
