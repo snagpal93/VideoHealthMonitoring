@@ -2,7 +2,14 @@ function webcam_ppg()
 
     % create bandpass filter between 40-220-HZ
     % create only once
-    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass');  
+    %[b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass'); 
+    
+    % Display rPPG bmp settings
+    position = [10 10];
+    box_color = {'blue'};
+    
+    first_window = 15;
+    first_run = true;
 
     %% Webcam get picture data
 
@@ -63,7 +70,7 @@ function webcam_ppg()
         end
 
         % show img with warning msg
-        img_text = insertText(img_ann,position,text_str,'FontSize',18,'BoxColor', box_color,'BoxOpacity',0.4,'TextColor','white');
+        img_text = insertText(img_ann, position, text_str, 'FontSize', 18, 'BoxColor', box_color, 'BoxOpacity', 0.4, 'TextColor', 'white');
         imshow(img_text)
 
     end
@@ -91,32 +98,25 @@ function webcam_ppg()
     % trackermodel; struct of tracker model, updated at each iteration
     % TrackFirstRun; flag to indicate if the tracker is executed for the first time, necessary for the trackermodel
 
-    % Display rPPG bmp settings
-    bpm_str = ['BMP: 0'];
-    position = [0 0];
-    box_color = {'blue'};
-
 
     %% Do here the detection loop
 
-    i = 1;
+    cnt = 1;
+    start_cnt = 1;
     while true
         % get camera frame
-        [img,timestamp(i)] = snapshot(cam);
+        [img, w_timestamp(cnt)] = snapshot(cam);
         img = imresize(img, 0.5);
         [rect,trackermodel] = tracker(img, TrackerInit, rect_prev, trackermodel, TrackFirstRun); 
 
         img_ann = insertObjectAnnotation(img,'rectangle',rect,'Face found');
 
         BB_eye  = eyeDetector(img, rect);
-        BB_nose = noseDetector(img, rect);
+        %BB_nose = noseDetector(img, rect);
 
         % Visualize bounding box in the frame
         img_ann = insertObjectAnnotation(img_ann,'rectangle',BB_eye,'Eyes found');
-        img_ann = insertObjectAnnotation(img_ann,'rectangle',BB_nose,'Nose found');
-
-        % show bpm in img
-        img_bmp = insertText(img_ann, position, bpm_str, 'FontSize',24, 'BoxColor', box_color, 'BoxOpacity' ,0.4 ,'TextColor','white');
+        %img_ann = insertObjectAnnotation(img_ann,'rectangle',BB_nose,'Nose found');
 
         if ~(isempty(BB_eye))
             x = BB_eye(1) + BB_eye(3)/2;
@@ -125,27 +125,32 @@ function webcam_ppg()
             img_bmp = insertShape(img_bmp,'Line',[x y1 x y2],'LineWidth',2,'Color','blue');
 
             img_bmp = insertObjectAnnotation(img_bmp,'rectangle',[x-30 y1-30 60 30],'meas', 'LineWidth',2,'Color','green');
+        
+            
+            % window capture
+            if  first_run == true% first run
+                if (w_timestap(cnt) >= first_window) % XXs captured first time calc ppg
+
+                    % update ppg
+                    [R_rs, G_rs, B_rs] = webcam_interpl(R_clean, G_clean, B_clean, w_timestap(1), w_timestap(cnt), w_timestap);
+                    %s_ppg = update_ppg(R_rs, G_rs, B_rs, w_timestap(1), w_timestap(cnt), w_timestap);
+
+                    first_run = false; % switch to sliding window
+                end
+                
+            % else update sliding window    
+            else 
+                s_ppg = update_ppg(R, G, B, w_timestap(1), w_timestap(cnt), w_timestap);
+            end
+
+            % insert bpm in img
+            img_bpm = insertText(img_ann, position, num2str(s_ppg), 'FontSize', 24, 'BoxColor', box_color, 'BoxOpacity' ,0.4 ,'TextColor','white');
+            % update img
+            imshow(img_bpm)
+            cnt = cnt +1;
+
         end
-
-        imshow(img_bmp)
-        
-        
-        %here we need to know the pixel colors already
-        s_chrom = chrom_method(R, G, B, a_BPF40220, b_BPF40220);
-        
-        % calcuate pulse rate from frequncy domain
-        [~,peak] = max(abs(fft(hanning(s_chrom),60*Fs)));
-
     end
-
-    %% [optional] Skin classifier
-
-
-    %% Resampling webcam frames
-    %vq = interp1(x,v,xq)
-    % returns interpolated values of a 1-D function at specific query points using linear ...
-    %    interpolation. Vector x contains the sample points, and v contains the corresponding values, ...
-    %    v(x). Vector xq contains the coordinates of the query points.
 
     % Clean Up
     clear cam
