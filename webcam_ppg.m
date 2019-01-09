@@ -10,6 +10,10 @@ function webcam_ppg()
     
     first_window = 15;
     first_run = true;
+    
+    % create queary ploints for interpolation
+    % only once
+    xq = 0:pi/16:2*pi;
 
     %% Webcam get picture data
 
@@ -102,7 +106,7 @@ function webcam_ppg()
     %% Do here the detection loop
 
     cnt = 1;
-    start_cnt = 1;
+    start = cnt;
     while true
         % get camera frame
         [img, w_timestamp(cnt)] = snapshot(cam);
@@ -128,19 +132,26 @@ function webcam_ppg()
         
             
             % window capture
-            if  first_run == true% first run
+            if  first_run == true % first run
                 if (w_timestap(cnt) >= first_window) % XXs captured first time calc ppg
 
-                    % update ppg
-                    [R_rs, G_rs, B_rs] = webcam_interpl(R_clean, G_clean, B_clean, w_timestap(1), w_timestap(cnt), w_timestap);
-                    %s_ppg = update_ppg(R_rs, G_rs, B_rs, w_timestap(1), w_timestap(cnt), w_timestap);
-
+                    % resample webcam data      
+                    [Rc, Gc, Bc] = webcam_interpl(Rc, Gc, Bc, w_timestap, start, cnt, w_timestap);
+                    s_ppg = update_ppg(Rc, Gc, Bc, w_timestap(1), w_timestap(cnt), w_timestap);
+    
+                    % update sliding window
+                    start = start + wind_slide;
                     first_run = false; % switch to sliding window
                 end
                 
             % else update sliding window    
-            else 
-                s_ppg = update_ppg(R, G, B, w_timestap(1), w_timestap(cnt), w_timestap);
+            elseif (w_timestap(cnt) >= first_window)
+                % resample webcam data       
+                [R_rs, G_rs, B_rs] = webcam_interpl(R_clean(start:cnt), G_clean(start:cnt), B_clean(start:cnt), w_timestap(1), w_timestap(cnt), w_timestap);
+                % update ppg
+                s_ppg = update_ppg(R_rs(start:cnt), G_rs(start:cnt), B_rs(start:cnt), w_timestap(start:cnt), w_timestap(cnt), w_timestap);
+                
+                start = start + wind_slide;
             end
 
             % insert bpm in img
@@ -151,6 +162,9 @@ function webcam_ppg()
 
         end
     end
+    
+    % evaluation of the framework
+    fw_evaluation(P_F);
 
     % Clean Up
     clear cam
