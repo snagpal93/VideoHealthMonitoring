@@ -29,10 +29,13 @@ disp('You selected the correct input:')
 if str == 'w'
     disp('- Webcam')
     % call here  webcam function
-    webcam_ppg();
+    Pt = webcam_ppg();
 else
     disp('- Existing recording')
     % call here recording function
-    video_ppg();
+    Pt = video_ppg();
 end
+
+% evaluation of the framework
+fw_evaluation(str, Pt, Fs, PR_reference);
 

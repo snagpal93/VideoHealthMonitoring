@@ -1,19 +1,19 @@
 function webcam_ppg()
-
+    
+    % ppg Sliding window settings 
+    window_size = 80;   % size in frames
+    Fs = 20;            % in Hz
+    update_Fs = 1/Fs;   % in time
+    
+    % Display rPPG bpm settings
+    bpm_front_size = 18;         
+    bpm_position = [10 10];     % position of bpm print
+    bpm_box_color = {'blue'};   % color of box
+    bpm_text_color = {'white'};
+    
     % create bandpass filter between 40-220-HZ
     % create only once
     %[b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass'); 
-    
-    % Display rPPG bmp settings
-    position = [10 10];
-    box_color = {'blue'};
-    
-    first_window = 15;
-    first_run = true;
-    
-    % create queary ploints for interpolation
-    % only once
-    xq = 0:pi/16:2*pi;
 
     %% Webcam get picture data
 
@@ -105,11 +105,11 @@ function webcam_ppg()
 
     %% Do here the detection loop
 
-    cnt = 1;
-    start = cnt;
+    last = 1;
+    first = last;
     while true
         % get camera frame
-        [img, w_timestamp(cnt)] = snapshot(cam);
+        [img, w_timestamp(last)] = snapshot(cam);
         img = imresize(img, 0.5);
         [rect,trackermodel] = tracker(img, TrackerInit, rect_prev, trackermodel, TrackFirstRun); 
 
@@ -131,40 +131,24 @@ function webcam_ppg()
             img_bmp = insertObjectAnnotation(img_bmp,'rectangle',[x-30 y1-30 60 30],'meas', 'LineWidth',2,'Color','green');
         
             
-            % window capture
-            if  first_run == true % first run
-                if (w_timestap(cnt) >= first_window) % XXs captured first time calc ppg
-
-                    % resample webcam data      
-                    [Rc, Gc, Bc] = webcam_interpl(Rc, Gc, Bc, w_timestap, start, cnt, w_timestap);
-                    s_ppg = update_ppg(Rc, Gc, Bc, w_timestap(1), w_timestap(cnt), w_timestap);
-    
-                    % update sliding window
-                    start = start + wind_slide;
-                    first_run = false; % switch to sliding window
-                end
-                
-            % else update sliding window    
-            elseif (w_timestap(cnt) >= first_window)
-                % resample webcam data       
-                [R_rs, G_rs, B_rs] = webcam_interpl(R_clean(start:cnt), G_clean(start:cnt), B_clean(start:cnt), w_timestap(1), w_timestap(cnt), w_timestap);
+            % window capture, update sliding window    
+            if (w_timestap(last) - w_timestap(first) >= window_size)
+                % resample webcam data 
+                [Rc, Gc, Bc] = webcam_interpl(Rc, Gc, Bc, w_timestap, first, last, update_Fs);
                 % update ppg
-                s_ppg = update_ppg(R_rs(start:cnt), G_rs(start:cnt), B_rs(start:cnt), w_timestap(start:cnt), w_timestap(cnt), w_timestap);
+                %s_ppg = update_ppg(Rc, Gc, Bc, first, last);
                 
-                start = start + wind_slide;
+                first = first + last;
             end
 
             % insert bpm in img
-            img_bpm = insertText(img_ann, position, num2str(s_ppg), 'FontSize', 24, 'BoxColor', box_color, 'BoxOpacity' ,0.4 ,'TextColor','white');
+            img_bpm = insertText(img_ann, bpm_position, num2str(s_ppg), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
             % update img
             imshow(img_bpm)
-            cnt = cnt +1;
+            last = last +1;
 
         end
     end
-    
-    % evaluation of the framework
-    fw_evaluation(P_F);
 
     % Clean Up
     clear cam
