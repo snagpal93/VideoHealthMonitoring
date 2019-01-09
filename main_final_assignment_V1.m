@@ -33,5 +33,6 @@ if str == 'w'
 else
     disp('- Existing recording')
     % call here recording function
+    video_ppg();
 end
 
