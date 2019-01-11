@@ -6,7 +6,7 @@ function [meanSkinPixel] = meanSkin(faceImg)
     %   Detailed explanation goes here
 
 
-
+    skinPixels = [] ;
         
     %Use k-means segmentation for skin pixel classification(k=3)
     [L,Centers] = imsegkmeans(faceImg,3);
