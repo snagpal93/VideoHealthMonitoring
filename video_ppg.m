@@ -1,4 +1,4 @@
-function video_ppg()
+function [S_PBV] = video_ppg()
 
     % create bandpass filter between 40-220-HZ
     % create only once
@@ -134,51 +134,56 @@ function video_ppg()
         %Crop the face ROI from the complete image
         faceImg = imcrop(img,rect);
         
-        %Use k-means segmentation for skin pixel classification(k=3)
-        [L,Centers] = imsegkmeans(faceImg,3);
-        
-        % The center with highest red value will be the one identifying skin pixels  
-        red = Centers(:,1);
-        
-        %Select the Label with highest red value
-        [value, skinL] = max(red);
-        
-        [rows,cols] = size(L);
-
-        %Iterate over all pixels to find the ones classified as skin
-        for col = 1:cols
-            for row = 1:rows
-                if(L(row,col) == skinL)
-                    pix = faceImg(row,col,:);
-                    skinPixels = [ skinPixels pix];
-                end
-
-            end
-        end
-    
         %Mean value of all pixels identified as skin in the current frame.
-        meanSkin = mean(skinPixels);        
+        meanSkinPix = meanSkin(faceImg);        
         
         %Append the mean skin value
-        skinPixArray = [skinPixArray meanSkin];  
+        skinPixArray = [skinPixArray meanSkinPix];  
 
         imshow(img_bmp)
 
 
     end
     
-    fs_video=20;
+    Fs=20;
     R=skinPixArray(1,:,1);
     G=skinPixArray(1,:,2);
     B=skinPixArray(1,:,3);
     
-    t=[0:length(R)-1]/fs_video;
+    t=[0:length(R)-1]/Fs;
     figure
     plot(t,G,'g')
     hold on
     plot(t,R,'r')
     hold on
     plot(t,B,'b')
+
+    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass');
+    [b_LPF30, a_LPF30] = butter(6, ([30]/60)/(Fs/2), 'low');
+
+    x_lpf = filtfilt(b_LPF30,a_LPF30, R); 
+    y_ACDC_R = (R - x_lpf)./x_lpf;
+    x_lpf = filtfilt(b_LPF30,a_LPF30, G); 
+    y_ACDC_G = (G - x_lpf)./x_lpf;
+    x_lpf = filtfilt(b_LPF30,a_LPF30, B); 
+    y_ACDC_B = (B - x_lpf)./x_lpf;
+
+
+    Rn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_R); 
+    Gn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_G); 
+    Bn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_B); 
+    
+    Rc = filtfilt(b_BPF40220,a_BPF40220, Rn); 
+    Gc = filtfilt(b_BPF40220,a_BPF40220, Gn); 
+    Bc = filtfilt(b_BPF40220,a_BPF40220, Bn); 
+
+    %%%%%%% Optimal projection axis %%%%%%%%%%%%%
+    z = [Rc(:) Gc(:) Bc(:)];
+    S = z'*z;    %%% The covariance matrix
+    pbv = [0.15 0.87 0.47]/norm([0.15 0.87 0.47]);
+    pbv=pbv';
+    W = S\pbv;      %%% LMS solution S*W=q
+    S_PBV = z*W/(pbv'*W);%%% Project data and correct amplitude
 
 
 
