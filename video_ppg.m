@@ -1,4 +1,4 @@
-function [S_PBV] = video_ppg()
+function [S_PBV,ref_n] = video_ppg()
 
     % create bandpass filter between 40-220-HZ
     % create only once
@@ -12,11 +12,30 @@ function [S_PBV] = video_ppg()
 
 
     %% INIT VIDEO dir
+    prompt = 'Select video file: stationary[s]/translation[t]/mixed_motion[m]: ';
+    vid = input(prompt,'s');
+
+    while ((vid~='s') && (vid~='t') && (str~='m'))
+        disp('Wrong input selected, please slelect correct:')
+        prompt = 'Select video file: stationary[s]/translation[t]/mixed_motion[m]: ';
+        vid = input(prompt,'s');
+    end
  
+    if (vid=='s')
+        fileDir = "VHMDataset\stationary\bmp\";
+        refData = xlsread("VHMDataset/stationary/reference.csv");
+    end    
+ 
+    if (vid=='t')
+        fileDir = "VHMDataset\translation\bmp\";
+        refData = xlsread("VHMDataset/translation/reference.csv");
+    end
 
-    
-    fileDir = "VHMDataset\stationary\bmp\";
-
+ 
+    if (vid=='m')
+        fileDir = "VHMDataset\mixed_motion\bmp\";
+        refData = xlsread("VHMDataset/mixed_motion/reference.csv");
+    end
 
     % INIT Face detection with Viola-Jones algorithm
     % Create a cascade detector object.
@@ -184,6 +203,14 @@ function [S_PBV] = video_ppg()
     pbv=pbv';
     W = S\pbv;      %%% LMS solution S*W=q
     S_PBV = z*W/(pbv'*W);%%% Project data and correct amplitude
+    
+    
+    ref = refData(:,2);
+
+    lpf = filtfilt(b_LPF30,a_LPF30, ref); 
+    y_ACDC_ref = (ref - lpf)./lpf;
+
+    ref_n = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_ref);
 
 
 

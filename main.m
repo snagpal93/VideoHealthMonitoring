@@ -33,7 +33,7 @@ if str == 'w'
 else
     disp('- Existing recording')
     % call here recording function
-    Pt = video_ppg();
+    Pt,PPG_ref = video_ppg();
 end
 
 % evaluation of the framework
