@@ -1,6 +1,7 @@
 %% chrome method function                         
 
 function s_chrom = chrom_method(ACDC_R, ACDC_G, ACDC_B, a_filter, b_filter)
+
                 %%%%% normalized skin tone
                 Rc=1.00*ACDC_R;
                 Gc=0.66667*ACDC_G;
