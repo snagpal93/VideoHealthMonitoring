@@ -60,7 +60,10 @@ function s_ppg = webcam_ppg(Fs)
     end
  
     % webcam settings
-    %cam.Resolution = res_windows;
+    if crop_mac == false
+        cam.Resolution = res_windows;
+    end
+    
     %cam.Exposure = -4;
     %cam.Gain = 253;
     %cam.Saturation = 32;
@@ -87,7 +90,9 @@ function s_ppg = webcam_ppg(Fs)
         % get first shot to get face and make init ROI for the tracker
         [img, ~] = snapshot(cam);
  
-        img = imresize(img, 0.25);
+        if crop_mac == true
+            img = imresize(img, crop_size);
+        end
  
         % get first ROI to init tracker
         rect_prev = step(faceDetector, img);
@@ -209,10 +214,12 @@ function s_ppg = webcam_ppg(Fs)
             test = test + Fs;
             
             sec = sec +1;
+            
+             s_ppg(sec)
         end
  
         % insert pulse rate in img
-        img_pulse = insertText(img_ann, bpm_position, num2str(s_ppg(sec)), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
+        img_pulse = insertText(img_ann, bpm_position, int2str(s_ppg(sec)), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
         % update img
         imshow(img_pulse)
         last = last +1;
