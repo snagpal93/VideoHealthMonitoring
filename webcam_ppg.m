@@ -1,10 +1,11 @@
 function s_ppg = webcam_ppg(Fs)
 
     crop_mac = true;
-    crop_size = 0.5;
+    crop_size = 0.25;
     res_windows = '320x240';
     
     max_run = 30;       % define maximal runtime before quit
+    max_run = max_run - 15;
      
     % ppg Sliding window settings 
     window_size = 15;   % size in frames
@@ -170,21 +171,23 @@ function s_ppg = webcam_ppg(Fs)
     bpm ='0';
     w_timestamp(last) = 0;
     
-    while w_timestamp(last) < max_run
-        
+    while w_timestamp(first) < max_run
+        w_timestamp(first)
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
+        
         % resize
         if crop_mac == true
             img = imresize(img, crop_size);
         end
         % track face
         [rect, trackermodel] = tracker(img, TrackerInit, rect_prev, trackermodel, TrackFirstRun); 
- 
         img_ann = insertObjectAnnotation(img,'rectangle',rect,'Face found');
         
+        rect2 = [rect(1)+floor(0.2*rect(3)) rect(2) floor(0.6*rect(3)) rect(4)];
+        
         % calc mean pix value
-        [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(img,rect));
+        [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(img,rect2));
 
         if last > 1
             fps = 1/(w_timestamp(last) - w_timestamp((last-1)));
