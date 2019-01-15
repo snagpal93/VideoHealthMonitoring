@@ -2,7 +2,7 @@ function s_ppg = webcam_ppg(Fs)
 
     crop_mac = true;
     crop_size = 0.25;
-    res_windows = '640x480';
+    res_windows = '320x240';
      
     % ppg Sliding window settings 
     window_size = 15;   % size in frames
@@ -16,6 +16,10 @@ function s_ppg = webcam_ppg(Fs)
     bpm_position = [10 10];     % position of bpm print
     bpm_box_color = {'blue'};   % color of box
     bpm_text_color = {'white'};
+         
+    fps_position = [10 140];     % position of bpm print
+    fps_box_color = {'green'};   % color of box
+    fps = 0;
      
     % create bandpass filter between 40-220-HZ
     % create only once
@@ -60,10 +64,7 @@ function s_ppg = webcam_ppg(Fs)
     end
  
     % webcam settings
-    if crop_mac == false
-        cam.Resolution = res_windows;
-    end
-    
+    %cam.Resolution = res_windows;
     %cam.Exposure = -4;
     %cam.Gain = 253;
     %cam.Saturation = 32;
@@ -74,7 +75,6 @@ function s_ppg = webcam_ppg(Fs)
     %cam.Brightness = 128;
     %cam.BacklightCompensation = 1;
     %cam.Contrast = 32;
-    %preview(cam)
  
     % INIT Face detection with Viola-Jones algorithm
     % Create a cascade detector object.
@@ -89,7 +89,8 @@ function s_ppg = webcam_ppg(Fs)
     while face_found == false
         % get first shot to get face and make init ROI for the tracker
         [img, ~] = snapshot(cam);
- 
+        
+        % only crop picture if you want, on windows use other resolution
         if crop_mac == true
             img = imresize(img, crop_size);
         end
@@ -164,6 +165,8 @@ function s_ppg = webcam_ppg(Fs)
     
     test = 281;
     
+    bpm ='0';
+    
     while true
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
@@ -178,7 +181,10 @@ function s_ppg = webcam_ppg(Fs)
         
         % calc mean pix value
         [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(img,rect));
- 
+
+        if last > 1
+            fps = 1/(w_timestamp(last) - w_timestamp((last-1)));
+        end
         %BB_eye  = eyeDetector(img, rect);
         %BB_nose = noseDetector(img, rect);
  
@@ -198,7 +204,6 @@ function s_ppg = webcam_ppg(Fs)
         if (w_timestamp(last) - w_timestamp(first) >= window_size)
             % resample webcam data    
             
-            
             if window_size == 1
                 [Ri(test:f_last), Gi(test:f_last), Bi(test:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 20);
             else
@@ -213,13 +218,14 @@ function s_ppg = webcam_ppg(Fs)
             f_last = f_last + Fs;
             test = test + Fs;
             
-            sec = sec +1;
+            bpm = num2str(s_ppg(sec))
             
-             s_ppg(sec)
+            sec = sec +1;
         end
  
         % insert pulse rate in img
-        img_pulse = insertText(img_ann, bpm_position, int2str(s_ppg(sec)), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
+        img_pulse = insertText(img_ann, bpm_position, bpm, 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
+        img_pulse = insertText(img_pulse, fps_position, fps, 'FontSize', bpm_front_size, 'BoxColor', fps_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
         % update img
         imshow(img_pulse)
         last = last +1;
