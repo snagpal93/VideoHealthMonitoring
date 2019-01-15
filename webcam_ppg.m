@@ -1,4 +1,8 @@
 function s_ppg = webcam_ppg(Fs)
+
+    crop_mac = true;
+    crop_size = 0.25;
+    res_windows = '640x480';
      
     % ppg Sliding window settings 
     window_size = 15;   % size in frames
@@ -56,7 +60,7 @@ function s_ppg = webcam_ppg(Fs)
     end
  
     % webcam settings
-    %cam.Resolution = '320x240';
+    %cam.Resolution = res_windows;
     %cam.Exposure = -4;
     %cam.Gain = 253;
     %cam.Saturation = 32;
@@ -145,7 +149,7 @@ function s_ppg = webcam_ppg(Fs)
     Gi = zeros(1, 20*60*min_run, 'double');
     Bi = zeros(1, 20*60*min_run, 'double');
     
-    s_ppg = zeros(1, 60*min_run, 'int8');
+    s_ppg = zeros(1, 60*min_run);
  
     last = 1;
     first = 1;
@@ -159,7 +163,9 @@ function s_ppg = webcam_ppg(Fs)
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
         % resize
-        img = imresize(img, 0.25);
+        if crop_mac == true
+            img = imresize(img, crop_size);
+        end
         % track face
         [rect, trackermodel] = tracker(img, TrackerInit, rect_prev, trackermodel, TrackFirstRun); 
  
