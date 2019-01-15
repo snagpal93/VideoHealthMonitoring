@@ -3,6 +3,8 @@ function s_ppg = webcam_ppg(Fs)
     crop_mac = true;
     crop_size = 0.25;
     res_windows = '320x240';
+    
+    max_run = 30;       % define maximal runtime before quit
      
     % ppg Sliding window settings 
     window_size = 15;   % size in frames
@@ -166,8 +168,9 @@ function s_ppg = webcam_ppg(Fs)
     test = 281;
     
     bpm ='0';
+    w_timestamp(last) = 0;
     
-    while true
+    while w_timestamp(last) < max_run
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
         % resize
