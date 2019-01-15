@@ -1,7 +1,7 @@
 function s_ppg = webcam_ppg(Fs)
 
     crop_mac = true;
-    crop_size = 0.25;
+    crop_size = 0.5;
     res_windows = '320x240';
     
     max_run = 30;       % define maximal runtime before quit
@@ -171,6 +171,7 @@ function s_ppg = webcam_ppg(Fs)
     w_timestamp(last) = 0;
     
     while w_timestamp(last) < max_run
+        
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
         % resize
@@ -221,7 +222,7 @@ function s_ppg = webcam_ppg(Fs)
             f_last = f_last + Fs;
             test = test + Fs;
             
-            bpm = num2str(s_ppg(sec))
+            bpm = num2str(s_ppg(sec));
             
             sec = sec +1;
         end
@@ -232,7 +233,6 @@ function s_ppg = webcam_ppg(Fs)
         % update img
         imshow(img_pulse)
         last = last +1;
- 
     end
  
  % Clean Up
