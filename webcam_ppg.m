@@ -4,8 +4,8 @@ function s_ppg = webcam_ppg(Fs)
     crop_size = 0.25;
     res_windows = '320x240';
     
-    max_run = 30;       % define maximal runtime before quit
-    max_run = max_run - 15;
+    max_run = 1;       % define maximal runtime in min before quit
+    max_run = max_run*60;
      
     % ppg Sliding window settings 
     window_size = 15;   % size in frames
@@ -165,14 +165,11 @@ function s_ppg = webcam_ppg(Fs)
     f_first = 1;
     f_last = 300;
     sec = 4;
-    
     test = 281;
     
     bpm ='0';
-    w_timestamp(last) = 0;
     
     while w_timestamp(first) < max_run
-        w_timestamp(first)
         % get camera frame
         [img, w_timestamp(last)] = snapshot(cam);
         
@@ -209,8 +206,7 @@ function s_ppg = webcam_ppg(Fs)
              
         % window capture, update sliding window    
         if (w_timestamp(last) - w_timestamp(first) >= window_size)
-            % resample webcam data    
-            
+            % resample webcam data                
             if window_size == 1
                 [Ri(test:f_last), Gi(test:f_last), Bi(test:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 20);
             else
@@ -224,6 +220,7 @@ function s_ppg = webcam_ppg(Fs)
             f_first = f_first + Fs;
             f_last = f_last + Fs;
             test = test + Fs;
+            first = first + (last-first) +1;
             
             bpm = num2str(s_ppg(sec));
             
@@ -236,7 +233,10 @@ function s_ppg = webcam_ppg(Fs)
         % update img
         imshow(img_pulse)
         last = last +1;
+
     end
+    
+    plot(Ri)
  
  % Clean Up
  clear cam

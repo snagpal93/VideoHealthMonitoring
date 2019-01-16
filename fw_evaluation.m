@@ -42,7 +42,7 @@ function fw_evaluation(source_input, Pt, Fs, PR_reference)
     
     
     % Visualize Bland-Altman analysis
-    if str == 'v'
+    if source_input == 'v'
         % Perform Bland-Altman analysis on pulse rates extracted from the camera and the reference sensor (more details can be found in the `ba' function file):
         ba(subplot(1,3,3), Pt, PR_reference, 'XName', 'rPPG', 'YName', 'Reference', 'PlotMeanDifference', true, 'PlotStatistics','basic');
     end
