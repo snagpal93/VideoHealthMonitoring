@@ -16,7 +16,7 @@ function fw_evaluation(source_input, Pt, Fs, PR_reference)
     if source_input == 'v'
         subplot(1,3,1);
     else
-        subplot(1,2,1);
+        subplot(1,3,1);
     end
     plot(SNRt); 
     xlabel('Frame'); ylabel('Pulse rate [bpm]'); title('SNR');
@@ -35,15 +35,20 @@ function fw_evaluation(source_input, Pt, Fs, PR_reference)
     if source_input == 'v'
         subplot(1,3,2);
     else
-        subplot(1,2,2);
+        subplot(1,3,2);
     end
     imagesc(P_F(1:300,:)); % only visualize relevant frequencies [bpm]
-    colormap('jet'); set(gca,'YDir','normal'); xlabel('Frame'); ylabel('Pulse rate [bpm]'); title('Spectrogram'); sgtitle('Framework Perfromace Evaluation')
+    colormap('jet'); set(gca,'YDir','normal'); xlabel('Frame'); ylabel('Pulse rate [bpm]'); title('Spectrogram'); sgtitle('Framework Perfromace Evaluation');
     
     
     % Visualize Bland-Altman analysis
     if source_input == 'v'
         % Perform Bland-Altman analysis on pulse rates extracted from the camera and the reference sensor (more details can be found in the `ba' function file):
         ba(subplot(1,3,3), Pt, PR_reference, 'XName', 'rPPG', 'YName', 'Reference', 'PlotMeanDifference', true, 'PlotStatistics','basic');
+    else
+        %plot pulse rate
+        subplot(1,3,3);
+        plot(Pt);
+        xlabel('Time in sec'); ylabel('Pulse rate [bpm]'); title('Extracted pulse rate');
     end
 end

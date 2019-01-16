@@ -1,4 +1,4 @@
-function s_ppg = webcam_ppg(Fs)
+function final_ppg, ppg_seg = webcam_ppg(Fs)
 
     crop_mac = true;
     crop_size = 0.25;
@@ -166,7 +166,6 @@ function s_ppg = webcam_ppg(Fs)
     f_last = 300;
     sec = 4;
     test = 281;
-    
     bpm ='0';
     
     while w_timestamp(first) < max_run
@@ -213,6 +212,7 @@ function s_ppg = webcam_ppg(Fs)
                 [Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 300);
                 window_size = 1;
             end
+            
             % update ppg
             s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
             
@@ -235,9 +235,7 @@ function s_ppg = webcam_ppg(Fs)
         last = last +1;
 
     end
-    
-    plot(Ri)
- 
  % Clean Up
  clear cam
+final_ppg = s_ppg(1:sec)
  end
