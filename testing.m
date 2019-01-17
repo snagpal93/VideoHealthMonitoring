@@ -201,14 +201,14 @@ while runLoop && w_timestamp(first) < max_run
             bboxPolygon = reshape(bboxPoints', 1, []);
 
             % Display a bounding box around the face being tracked.
-            videoFrame = insertShape(videoFrame, 'Polygon', bboxPolygon, 'LineWidth', 3);
+            %videoFrame = insertShape(videoFrame, 'Polygon', bboxPolygon, 'LineWidth', 3);
 
             % Display tracked points.
-            videoFrame = insertMarker(videoFrame, visiblePoints, '+', 'Color', 'white');
+            %videoFrame = insertMarker(videoFrame, visiblePoints, '+', 'Color', 'white');
 
             % Reset the points.
-            oldPoints = visiblePoints;
-            setPoints(pointTracker, oldPoints);
+            %oldPoints = visiblePoints;
+            %setPoints(pointTracker, oldPoints);
         end
 
     end
@@ -248,8 +248,10 @@ while runLoop && w_timestamp(first) < max_run
                 window_size = 1;
             end
 
+            s_chrom = chrom_method(Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last), a_BPF40220, b_BPF40220);
+            length(s_chrom)
             % update ppg
-            s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
+            %s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
 
             w_timestamp(first) = w_timestamp(first) + Fs_time;
             f_first = f_first + Fs;
@@ -278,6 +280,8 @@ while runLoop && w_timestamp(first) < max_run
     
     last = last +1;
 end
+
+plot(Ri)
 
 % Clean up.
 clear cam;
