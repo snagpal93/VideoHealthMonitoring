@@ -1,8 +1,8 @@
 function [final_ppg, ppg_seg] = webcam_ppg()
 
-    crop_mac = yes;            % choose if mac is used
-    crop_size = 0.5;            % choose crop size on mac
-    res_windows = '320x240';    % on windows dont crop but use resolution
+    crop_mac = false;            % choose if mac is used
+    crop_size = 0.7;            % choose crop size on mac
+    res_windows = '640x480';    % on windows dont crop but use resolution
 
     max_run = 1;                % define maximal runtime in min before quit
 
@@ -81,7 +81,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
     end
 
     % webcam settings
-    %cam.Resolution = res_windows;
+    cam.Resolution = res_windows;
     %cam.Exposure = -4;
     %cam.Gain = 253;
     %cam.Saturation = 32;
@@ -107,6 +107,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
 
     % Create the point tracker object.
     pointTracker = vision.PointTracker('MaxBidirectionalError', 2);
+    figure
 
     % Capture one frame to get its size.
     videoFrame = snapshot(cam);
@@ -217,6 +218,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
             % calc mean pix value
             rect2 = [bbox(1)+floor(0.2*bbox(3)) bbox(2) floor(0.6*bbox(3)) bbox(4)];
             [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(videoFrame,rect2));
+            
 
             % Visualize bounding box in the frame
             videoFrame = insertObjectAnnotation(videoFrame,'rectangle',rect2,'Face'); 
@@ -248,6 +250,13 @@ function [final_ppg, ppg_seg] = webcam_ppg()
                     [Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 80);
                     window_size = 1;
                 end
+                
+                plot(Ri(1:f_last))
+                hold on
+                plot(Gi(1:f_last))
+                plot(Bi(1:f_last))
+                hold off
+
 
                 %s_chrom = chrom_method(Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last), a_BPF40220, b_BPF40220);
                 %length(s_chrom)
