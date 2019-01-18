@@ -1,7 +1,7 @@
 function [final_ppg, ppg_seg] = webcam_ppg()
 
-    crop_mac = true;            % choose if mac is used
-    crop_size = 0.4;            % choose crop size on mac
+    crop_mac = yes;            % choose if mac is used
+    crop_size = 0.5;            % choose crop size on mac
     res_windows = '320x240';    % on windows dont crop but use resolution
 
     max_run = 1;                % define maximal runtime in min before quit
@@ -219,7 +219,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
             [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(videoFrame,rect2));
 
             % Visualize bounding box in the frame
-            videoFrame = insertObjectAnnotation(videoFrame,'rectangle',bbox,'Face'); 
+            videoFrame = insertObjectAnnotation(videoFrame,'rectangle',rect2,'Face'); 
 
             if last > 1
                 fps = 1/(w_timestamp(last) - w_timestamp((last-1)));
@@ -241,8 +241,6 @@ function [final_ppg, ppg_seg] = webcam_ppg()
 
                 % window capture, update sliding window    
             if (w_timestamp(last) - w_timestamp(first) >= window_size)
-                f_first
-                f_last
                 % resample webcam data                
                 if window_size == 1
                     [Ri(test:f_last), Gi(test:f_last), Bi(test:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 20);
