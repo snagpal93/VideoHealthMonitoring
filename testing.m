@@ -1,5 +1,5 @@
 crop_mac = true;
-crop_size = 0.4;
+crop_size = 0.5;
 res_windows = '320x240';
     
 max_run = 1;       % define maximal runtime in min before quit
@@ -201,14 +201,14 @@ while runLoop && w_timestamp(first) < max_run
             bboxPolygon = reshape(bboxPoints', 1, []);
 
             % Display a bounding box around the face being tracked.
-            %videoFrame = insertShape(videoFrame, 'Polygon', bboxPolygon, 'LineWidth', 3);
+            videoFrame = insertShape(videoFrame, 'Polygon', bboxPolygon, 'LineWidth', 3);
 
             % Display tracked points.
-            %videoFrame = insertMarker(videoFrame, visiblePoints, '+', 'Color', 'white');
+            videoFrame = insertMarker(videoFrame, visiblePoints, '+', 'Color', 'white');
 
             % Reset the points.
-            %oldPoints = visiblePoints;
-            %setPoints(pointTracker, oldPoints);
+            oldPoints = visiblePoints;
+            setPoints(pointTracker, oldPoints);
         end
 
     end
@@ -218,7 +218,7 @@ while runLoop && w_timestamp(first) < max_run
         [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(videoFrame,bbox));
 
         % Visualize bounding box in the frame
-        videoFrame = insertObjectAnnotation(videoFrame,'rectangle',bbox,'ROI'); 
+        %videoFrame = insertObjectAnnotation(videoFrame,'rectangle',bbox,'ROI'); 
 
         if last > 1
             fps = 1/(w_timestamp(last) - w_timestamp((last-1)));
