@@ -12,8 +12,8 @@ function [Ri, Gi, Bi] = webcam_interpl(R, G, B, w_timestamp, first, last, update
     Bi = Bi/mean(Bi) - 1;
     
     % maybe use better mode, e.g. spline, or use detrend after?
-    Ri = detrend(Ri);
-    Gi = detrend(Gi);
-    Bi = detrend(Bi);
+    %Ri = detrend(Ri);
+    %Gi = detrend(Gi);
+    %Bi = detrend(Bi);
     
 end

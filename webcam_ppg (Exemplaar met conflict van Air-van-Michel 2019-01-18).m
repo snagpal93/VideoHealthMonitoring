@@ -8,7 +8,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
     max_run = max_run*60;
      
     % ppg Sliding window settings 
-    window_size = 4;   % size in frames
+    window_size = 15;   % size in frames
     Fs = 20;            % in Hz
     update_Fs = 1/Fs;   % in time
     Fs_time = 1;
@@ -26,7 +26,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
      
     % create bandpass filter between 40-220-HZ
     % create only once
-    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass');
+    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs),  'bandpass'); 
     
     s_ppg = 0;
  
@@ -149,15 +149,16 @@ function [final_ppg, ppg_seg] = webcam_ppg()
     %% Do here the detection loop
     
     % pre allocate array for realtime speed
+    % pre allocate array for realtime speed
     w_timestamp = zeros(1, 20*60*min_run, 'double');
     Rm = zeros(1, 20*60*min_run, 'double');
     Gm = zeros(1, 20*60*min_run, 'double');
     Bm = zeros(1, 20*60*min_run, 'double');
-    
+
     Ri = zeros(1, 20*60*min_run, 'double');
     Gi = zeros(1, 20*60*min_run, 'double');
     Bi = zeros(1, 20*60*min_run, 'double');
-    
+
     s_ppg = zeros(1, 60*min_run);
 
     last = 1;
@@ -168,7 +169,6 @@ function [final_ppg, ppg_seg] = webcam_ppg()
     test = 61;
     bpm ='0';
     s_ppg = 0;
-
     
     while w_timestamp(first) < max_run
         % get camera frame
@@ -182,16 +182,10 @@ function [final_ppg, ppg_seg] = webcam_ppg()
         [rect, trackermodel] = tracker(img, TrackerInit, rect_prev, trackermodel, TrackFirstRun); 
         img_ann = insertObjectAnnotation(img,'rectangle',rect,'Face found');
         
-        %rect2 = [bbox(1)+floor(0.2*bbox(3)) bbox(2) floor(0.6*bbox(3)) bbox(4)];
-        [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(img,rect));
-        
-        plot(Rm(1:last))
-        hold on
-        plot(Gm(1:last))
-        plot(Bm(1:last))
-        hold off
+        rect2 = [rect(1)+floor(0.2*rect(3)) rect(2) floor(0.6*rect(3)) rect(4)];
+        [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(img,rect2));
 
-            % Visualize bounding box in the frame
+        % Visualize bounding box in the frame
             %videoFrame = insertObjectAnnotation(videoFrame,'rectangle',rect2,'Face'); 
 
         if last > 1
@@ -218,6 +212,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
             if window_size == 1
                 [Ri(test:f_last), Gi(test:f_last), Bi(test:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 20);
             else
+
                 [Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 80);
                 window_size = 1;
             end
@@ -225,25 +220,26 @@ function [final_ppg, ppg_seg] = webcam_ppg()
                 %s_chrom = chrom_method(Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last), a_BPF40220, b_BPF40220);
                 %length(s_chrom)
                 % update ppg
-            s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
+                s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
 
-            w_timestamp(first) = w_timestamp(first) + Fs_time;
-            f_first = f_first + Fs;
-            f_last = f_last + Fs;
-            test = test + Fs;
-            first = first + (last-first) +1;
+                w_timestamp(first) = w_timestamp(first) + Fs_time;
+                f_first = f_first + Fs;
+                f_last = f_last + Fs;
+                test = test + Fs;
+                first = first + (last-first) +1;
 
-            bpm = num2str(s_ppg(sec))
+                bpm = num2str(s_ppg(sec))
 
-            sec = sec +1;
-        end
-            %videoFrame = insertText(videoFrame, face_pos, face_str, 'FontSize', 10, 'BoxColor', 'green', 'BoxOpacity', 0.4, 'TextColor', 'white');
-            %videoFrame = insertText(videoFrame, no_face_pos, no_face_str, 'FontSize', 12, 'BoxColor', 'red', 'BoxOpacity', 0.4, 'TextColor', 'white');
-                    % insert pulse rate in img
-            %videoFrame = insertText(videoFrame, bpm_position, strcat(bpm,'/bmp'), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
-            %videoFrame = insertText(videoFrame, fps_position, fps, 'FontSize', bpm_front_size, 'BoxColor', fps_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
-            %imshow(img_ann)
-            last = last +1;
+                sec = sec +1;
+            end
+            %videoFrame = insertText(img_ann, face_pos, face_str, 'FontSize', 10, 'BoxColor', 'green', 'BoxOpacity', 0.4, 'TextColor', 'white');
+            %videoFrame = insertText(img_ann, no_face_pos, no_face_str, 'FontSize', 12, 'BoxColor', 'red', 'BoxOpacity', 0.4, 'TextColor', 'white');
     end
+
+        % insert pulse rate in img
+        %videoFrame = insertText(videoFrame, bpm_position, strcat(bpm,'/bmp'), 'FontSize', bpm_front_size, 'BoxColor', bpm_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
+        %videoFrame = insertText(videoFrame, fps_position, fps, 'FontSize', bpm_front_size, 'BoxColor', fps_box_color, 'BoxOpacity' ,0.4 ,'TextColor', bpm_text_color);
+        imshow(videoFrame)
+        last = last +1;
 
 end
