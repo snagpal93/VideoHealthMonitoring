@@ -26,7 +26,7 @@ function final_ppg, ppg_seg = webcam_ppg(Fs)
      
     % create bandpass filter between 40-220-HZ
     % create only once
-    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass'); 
+    [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs),  'bandpass'); 
     
     s_ppg = 0;
  
@@ -213,10 +213,10 @@ function final_ppg, ppg_seg = webcam_ppg(Fs)
                 window_size = 1;
             end
             
-            s_chrom = chrom_method(R(first:last), G(first:last), B(first:last), a_BPF40220, b_BPF40220);
-            length(s_chrom)
+            %s_chrom = chrom_method(R(first:last), G(first:last), B(first:last), a_BPF40220, b_BPF40220);
+            %length(s_chrom)
             % update ppg
-            %s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
+            s_ppg(sec) = update_ppg(Ri, Gi, Bi, f_first, f_last, b_BPF40220, a_BPF40220);
             
             w_timestamp(first) = w_timestamp(first) + Fs_time;
             f_first = f_first + Fs;
