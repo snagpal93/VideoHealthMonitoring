@@ -7,8 +7,7 @@
 % Michel van Lier 0961263
 
 %=========================%=========================
-%=========================%=========================nn
-
+%=========================%=========================
 
 % tbs clear matlab
 clear all
@@ -34,13 +33,12 @@ while true
     if choise == 'w'
         disp('- Webcam')
         % call here  webcam function
-        [Ps, Pt] = webcam_ppg(Fs);
+        Pt = webcam_ppg(Fs);
         PR_reference = 0;
     elseif choise == 'v'
         disp('- Existing recording')
         % call here recording function
         [Pt, PR_reference] = video_ppg();
-        Ps = 0;
     else
         disp('- Quit Framework')
         return
@@ -50,7 +48,7 @@ while true
     if length(Pt) > 1
         disp('- Framework work is now going to evaluated')
         disp(' ')
-        fw_evaluation(choise, Pt, Ps, Fs, PR_reference);
+        fw_evaluation(choise, Pt, Fs, PR_reference);
     end 
 end
 

@@ -1,8 +1,8 @@
-function hr = update_ppg(p)
+function hr = update_ppg(R, G, B, first, last, b, a)
 
     Fs = 20;
     
-    %p = chrom_method(R(first:last), G(first:last), B(first:last), a, b);
+    p = chrom_method(R(first:last), G(first:last), B(first:last), a, b);
         
     % calcuate pulse rate from frequncy domain
     %[~,peak] = max(abs(fft(s_chrom)));
@@ -19,4 +19,6 @@ function hr = update_ppg(p)
     hbs = freq(index);  %Use the index to find the dominant frequency
 
     hr = hbs*60; %Convert from Hz to hbm
+
+
 end

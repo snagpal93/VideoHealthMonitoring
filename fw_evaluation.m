@@ -1,4 +1,4 @@
-function fw_evaluation(source_input, Pt, Ps, Fs, PR_reference)
+function fw_evaluation(source_input, Pt, Fs, PR_reference)
 
     % Sliding window SNR settings
     window_size = 300;
@@ -48,7 +48,7 @@ function fw_evaluation(source_input, Pt, Ps, Fs, PR_reference)
     else
         %plot pulse rate
         subplot(1,3,3);
-        plot(Ps);
+        plot(Pt);
         xlabel('Time in sec'); ylabel('Pulse rate [bpm]'); title('Extracted pulse rate');
     end
 end
