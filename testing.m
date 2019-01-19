@@ -1,9 +1,8 @@
 function [final_ppg, ppg_seg] = webcam_ppg()
 
-    %% Webcam framework Settings.
-    crop_mac = true;            % choose if mac is used
-    crop_size = 0.4;            % choose crop size on mac
-    res_windows = '320x240';    % on windows dont crop but use resolution
+    crop_mac = false;            % choose if mac is used
+    crop_size = 0.7;            % choose crop size on mac
+    res_windows = '640x480';    % on windows dont crop but use resolution
     max_run = 1;                % define maximal runtime in min before quit
 
     % ppg Sliding window settings .
@@ -91,19 +90,25 @@ function [final_ppg, ppg_seg] = webcam_ppg()
         disp('No real-time plot is showed.')
     end
 
-    
-    %% Init Setting
-
-    % webcam resolution settings
-    if crop_mac == false
-        cam.Resolution = res_windows;
-    end
+    % webcam settings
+    cam.Resolution = res_windows;
+    %cam.Exposure = -4;
+    %cam.Gain = 253;
+    %cam.Saturation = 32;
+    %cam.WhiteBalance = 8240;
+    %cam.WhiteBalanceMode = 'manual';
+    %cam.ExposureMode = 'manual'; 
+    %cam.Sharpness = 48;
+    %cam.Brightness = 128;
+    %cam.BacklightCompensation = 1;
+    %cam.Contrast = 32;
 
     % INIT Face detection with Viola-Jones algorithm
     faceDetector  = vision.CascadeObjectDetector();
 
     % Create the point tracker object.
     pointTracker = vision.PointTracker('MaxBidirectionalError', 2);
+    figure
 
     % Capture one frame to get its size.
     videoFrame = snapshot(cam);
@@ -222,6 +227,7 @@ function [final_ppg, ppg_seg] = webcam_ppg()
             
             % Skin classification and mean skin color calc
             [Rm(last), Gm(last), Bm(last)] = meanSkinRGB(imcrop(videoFrame,rect2));
+            
 
             % Visualize bounding box in the frame
             videoFrame = insertObjectAnnotation(videoFrame,'rectangle',rect2,'Face'); 
@@ -242,6 +248,13 @@ function [final_ppg, ppg_seg] = webcam_ppg()
                     [Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last)] = webcam_interpl(Rm, Gm, Bm, w_timestamp, first, last, update_Fs, 80);
                     window_size = 1;
                 end
+                
+                plot(Ri(1:f_last))
+                hold on
+                plot(Gi(1:f_last))
+                plot(Bi(1:f_last))
+                hold off
+
 
                 %s_chrom = chrom_method(Ri(f_first:f_last), Gi(f_first:f_last), Bi(f_first:f_last), a_BPF40220, b_BPF40220);
                 %length(s_chrom)
