@@ -38,7 +38,7 @@ while true
     elseif choise == 'v'
         disp('- Existing recording')
         % call here recording function
-        [Pt, PR_reference] = video_ppg();
+        [pbv, chr, PR_reference] = video_ppg();
     else
         disp('- Quit Framework')
         return
@@ -48,7 +48,11 @@ while true
     if length(Pt) > 1
         disp('- Framework work is now going to evaluated')
         disp(' ')
-        fw_evaluation(choise, Pt, Fs, PR_reference);
+        if (choise == 'v')
+            fw_eval_vid(S_PBV,s_CHROM,Fs,PR_reference);
+        else
+            fw_evaluation(choise, Pt, Fs, PR_reference);
+        end
     end 
 end
 

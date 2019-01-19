@@ -17,7 +17,7 @@ if (dimPPG(1) ~=300) display('Invalid input: data should by of dimension 1x300')
 p = ppg - mean(ppg);
 n = 512; % For FFT calculation
 Fs=20;  %Sampling frequency
-
+p = p.*hann(300);
 y = fft(p,n);   %fourier transform
 
 y = y(1:1+n/2); % Only half the values of concern

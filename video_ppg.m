@@ -1,4 +1,4 @@
-function [S_PBV,ref_n] = video_ppg()
+function [S_PBV,s_CHROM,ref_n] = video_ppg()
 
     % create bandpass filter between 40-220-HZ
     % create only once
@@ -15,7 +15,7 @@ function [S_PBV,ref_n] = video_ppg()
     prompt = 'Select video file: stationary[s]/translation[t]/mixed_motion[m]: ';
     vid = input(prompt,'s');
 
-    while ((vid~='s') && (vid~='t') && (str~='m'))
+    while ((vid~='s') && (vid~='t') && (vid~='m'))
         disp('Wrong input selected, please slelect correct:')
         prompt = 'Select video file: stationary[s]/translation[t]/mixed_motion[m]: ';
         vid = input(prompt,'s');
@@ -177,39 +177,19 @@ function [S_PBV,ref_n] = video_ppg()
     hold on
     plot(t,B,'b')
 
+    [S_PBV, s_CHROM] = processRGB(R,G,B);
+    
+    ref = refData(:,2);
+    
+    Fs = 20;
     [b_BPF40220, a_BPF40220] = butter(9, ([40 220] /60)/(Fs/2),  'bandpass');
     [b_LPF30, a_LPF30] = butter(6, ([30]/60)/(Fs/2), 'low');
 
-    x_lpf = filtfilt(b_LPF30,a_LPF30, R); 
-    y_ACDC_R = (R - x_lpf)./x_lpf;
-    x_lpf = filtfilt(b_LPF30,a_LPF30, G); 
-    y_ACDC_G = (G - x_lpf)./x_lpf;
-    x_lpf = filtfilt(b_LPF30,a_LPF30, B); 
-    y_ACDC_B = (B - x_lpf)./x_lpf;
-
-
-    Rn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_R); 
-    Gn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_G); 
-    Bn = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_B); 
     
-    Rc = filtfilt(b_BPF40220,a_BPF40220, Rn); 
-    Gc = filtfilt(b_BPF40220,a_BPF40220, Gn); 
-    Bc = filtfilt(b_BPF40220,a_BPF40220, Bn); 
-
-    %%%%%%% Optimal projection axis %%%%%%%%%%%%%
-    z = [Rc(:) Gc(:) Bc(:)];
-    S = z'*z;    %%% The covariance matrix
-    pbv = [0.15 0.87 0.47]/norm([0.15 0.87 0.47]);
-    pbv=pbv';
-    W = S\pbv;      %%% LMS solution S*W=q
-    S_PBV = z*W/(pbv'*W);%%% Project data and correct amplitude
-    
-    
-    ref = refData(:,2);
-
     lpf = filtfilt(b_LPF30,a_LPF30, ref); 
     y_ACDC_ref = (ref - lpf)./lpf;
 
+    
     ref_n = filtfilt(b_BPF40220,a_BPF40220, y_ACDC_ref);
 
 
