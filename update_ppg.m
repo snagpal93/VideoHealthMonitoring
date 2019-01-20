@@ -1,8 +1,6 @@
-function hr = update_ppg(R, G, B, first, last, b, a)
+function hr = update_ppg(p)
 
     Fs = 20;
-    
-    p = chrom_method(R(first:last), G(first:last), B(first:last), a, b);
         
     % calcuate pulse rate from frequncy domain
     %[~,peak] = max(abs(fft(s_chrom)));
