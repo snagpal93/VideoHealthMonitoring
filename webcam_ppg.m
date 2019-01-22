@@ -2,7 +2,7 @@ function [ppg, chrom] = webcam_ppg(Fs)
 
     %% Webcam framework Settings.
     crop_mac = true;            % choose if mac is used
-    crop_size = 0.35;            % choose crop size on mac
+    crop_size = 0.5;            % choose crop size on mac
     res_windows = '320x240';    % on windows dont crop but use resolution
     max_run = 1;                % define maximal runtime in min before quit
 

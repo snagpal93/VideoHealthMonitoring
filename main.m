@@ -33,7 +33,7 @@ while true
     if choise == 'w'
         disp('- Webcam')
         % call here  webcam function
-        Pt = webcam_ppg(Fs);
+        [Pp, chr] = webcam_ppg(Fs);
         PR_reference = 0;
     elseif choise == 'v'
         disp('- Existing recording')
@@ -45,13 +45,13 @@ while true
     end
 
     % evaluation of the framework
-    if length(Pt) > 1
+    if length(chr) > 1
         disp('- Framework work is now going to evaluated')
         disp(' ')
         if (choise == 'v')
             fw_eval_vid(S_PBV,s_CHROM,Fs,PR_reference);
         else
-            fw_evaluation(choise, Pt, Fs, PR_reference);
+            fw_evaluation(choise, chr, Fs, PR_reference, Pp);
         end
     end 
 end

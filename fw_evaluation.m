@@ -1,4 +1,4 @@
-function fw_evaluation(source_input, Pt, Fs, PR_reference)
+function fw_evaluation(source_input, Pt, Fs, PR_reference, Pp)
 
     % Sliding window SNR settings
     window_size = 300;
@@ -9,8 +9,7 @@ function fw_evaluation(source_input, Pt, Fs, PR_reference)
     end
     
     % Spectrogram calculation of the extracted pulse signal
-    P_F = spec(Pt,Fs); % P = pulse signal, Fs = frame rate (re)sampling frequency [Hz]
-    
+    P_F = spec(Pt,Fs); % P = pulse signal, Fs = frame rate (re)sampling frequency [Hz
     
     % Visualize SNR
     if source_input == 'v'
@@ -48,7 +47,7 @@ function fw_evaluation(source_input, Pt, Fs, PR_reference)
     else
         %plot pulse rate
         subplot(1,3,3);
-        plot(Pt);
+        plot(Pp);
         xlabel('Time in sec'); ylabel('Pulse rate [bpm]'); title('Extracted pulse rate');
     end
 end
